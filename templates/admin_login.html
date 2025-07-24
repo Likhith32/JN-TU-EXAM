@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Login - JNTU GV Quiz Portal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .login-container {
+      background: white;
+      padding: 2rem 3rem;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #5563c1;
+    }
+    .flash-message {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    .flash-message.success { color: green; }
+    .flash-message.error { color: red; }
+     .btn-download {
+    display: inline-block;
+    margin: 15px 0;
+    padding: 10px 15px;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+  }
+  .btn-download:hover {
+    background: #5563c1;
+  }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Admin Login</h2>
+
+    {% set error_messages = get_flashed_messages(category_filter=["error"]) %}
+    {% if error_messages %}
+      <div class="flash-message error">
+        {{ error_messages[0] }}
+      </div>
+    {% endif %}
+
+    {% set success_messages = get_flashed_messages(category_filter=["success"]) %}
+    {% if success_messages %}
+      <div class="flash-message success">
+        {{ success_messages[0] }}
+      </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('admin_login') }}">
+      <input type="text" name="username" placeholder="Username" required autofocus>
+      <input type="password" name="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</body>
+</html>

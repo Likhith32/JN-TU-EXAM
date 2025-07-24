@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Profile - {{ user.name }}{% endblock %}
+
+{% block content %}
+<style>
+  .profile-container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: linear-gradient(135deg, #c3cbed, #764ba2);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 25px;
+  }
+
+  .profile-header img {
+    width: 120px;
+    height: 120px;
+    border-radius: 100px;
+    object-fit: cover;
+    border: 4px solid white;
+  }
+
+  .profile-info p {
+    margin: 4px 0;
+    font-size: 16px;
+  }
+
+  .results-table {
+    width: 100%;
+    margin-top: 25px;
+    background: white;
+    color: #333;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .results-table th, .results-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .results-table th {
+    background: #5555aa;
+    color: white;
+    text-align: left;
+  }
+
+  .results-table tr:hover {
+    background: #f1f1f1;
+  }
+</style>
+
+<div class="profile-container">
+  <div class="profile-header">
+    {% if user.profile_pic == 'default.jpg' %}
+      {% if user.gender == 'Male' %}
+        <img src="{{ url_for('static', filename='uploads/male.jpeg') }}" alt="Profile">
+      {% else %}
+        <img src="{{ url_for('static', filename='uploads/female.jpeg') }}" alt="Profile">
+      {% endif %}
+    {% else %}
+      <img src="{{ url_for('static', filename='uploads/' ~ user.profile_pic) }}" alt="Profile">
+    {% endif %}
+
+    <div class="profile-info">
+      <h2>{{ user.name }}</h2>
+      <p><strong>Roll No:</strong> {{ user.roll_no }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Phone:</strong> {{ user.phone_number }}</p>
+      <p><strong>Branch:</strong> {{ user.branch }}</p>
+      <p><strong>Gender:</strong> {{ user.gender }}</p>
+      <p><strong>Address:</strong> {{ user.address }}</p>
+    </div>
+  </div>
+
+  <h3>Exam Results</h3>
+  {% if results %}
+  <table class="results-table">
+    <tr>
+      <th>Exam</th>
+      <th>Score</th>
+      <th>Total</th>
+      <th>Date</th>
+    </tr>
+    {% for result, exam in results %}
+    <tr>
+      <td>{{ exam.title }}</td>
+      <td>{{ result.score }}</td>
+      <td>{{ result.total_marks }}</td>
+      <td>{{ result.completed_at.strftime('%d-%m-%Y') }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+    <p>No exams attempted yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

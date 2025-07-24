@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block title %}{{ exam.title }} - JNTU GV Quiz Portal{% endblock %}
+
+{% block content %}
+<style>
+
+ body {
+    background: linear-gradient(to bottom right, #ffffff, #f0f0f8);
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  .exam-header-box {
+    max-width: 720px;
+    margin: 2rem auto;
+    padding: 1.8rem 2rem;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #ffffff, #e9e9f2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    color: #333;
+  }
+
+  .exam-header-box h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #4a4a80;
+  }
+
+  .exam-header-box p {
+    font-size: 1.1rem;
+    margin: 0.3rem 0;
+    color: #555;
+  }
+
+  .exam-header-box i {
+    color: #764ba2;
+  }
+  /* Question card base styling */
+ .question-card {
+  display: none;
+  animation: fadeSlideIn 0.6s ease forwards, animatedGradient 12s ease infinite;
+  background: linear-gradient(-45deg, #5062ae, #764ba2, #5782ba, #667eea);
+  background-size: 400% 400%;
+  color: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(118, 75, 162, 0.3);
+  margin: 1.5rem auto;
+  max-width: 700px;
+  transition: background-color 0.3s ease;
+}
+@keyframes animatedGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+  /* Active question visible */
+  .question-card.active {
+    display: block;
+  }
+
+  /* Animation for fade + slide from right */
+  @keyframes fadeSlideIn {
+    0% {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Option styling */
+  .options .option {
+    margin: 0.6rem 0;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .options .option:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.03);
+  }
+
+  .options .option.selected {
+    background-color: rgba(255, 255, 255, 0.45);
+    font-weight: 600;
+    box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.6);
+  }
+
+  /* Label styling for text */
+  .options label {
+    margin-left: 0.6rem;
+    user-select: none;
+  }
+
+  /* Hide native radio inputs but keep accessible */
+  .options input[type="radio"] {
+    display: none;
+  }
+
+  /* Exam header and timer styling */
+  .exam-header {
+    max-width: 700px;
+    margin: 0 auto 2rem auto;
+    color: #333;
+  }
+
+  .timer {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #764ba2;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Navigation buttons */
+  .navigation {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .navigation button {
+    margin: 0 0.8rem;
+    padding: 0.7rem 1.8rem;
+    font-size: 1.1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+
+  .btn.btn-secondary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+  }
+  .btn.btn-secondary:hover {
+    background-color: #999;
+  }
+
+  .btn.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.6);
+  }
+  .btn.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6edd, #683db5);
+  }
+
+  /* Progress bar styling */
+  .progress-bar {
+    height: 14px;
+    background-color: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    max-width: 700px;
+    margin: 1rem auto;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  }
+
+  .progress-fill {
+    height: 14px;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+</style>
+
+<div class="exam-header">
+  <h1>{{ exam.title }}</h1>
+  <p>{{ exam.description }}</p>
+  <p>
+    <i class="fas fa-clock"></i> Duration: {{ exam.duration_minutes }} minutes |
+    <i class="fas fa-trophy"></i> Total Marks: {{ exam.total_marks }}
+  </p>
+</div>
+
+<div class="timer" id="timer">
+  Time Remaining: <span id="time-display">{{ exam.duration_minutes }}:00</span>
+</div>
+
+<form id="exam-form">
+  <input type="hidden" name="exam_id" value="{{ exam.id }}">
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  {% for question in questions %}
+  <div class="question-card {% if loop.first %}active{% endif %}" data-index="{{ loop.index0 }}">
+    <p><strong>Question {{ loop.index }} of {{ questions|length }}:</strong> {{ question.question_text }}</p>
+
+    <div class="options">
+      <div class="option" onclick="selectOption(this, {{ question.id }}, 'A')">
+        <input type="radio" name="question_{{ question.id }}" value="A" id="q{{ question.id }}_a">
+        <label for="q{{ question.id }}_a"><strong>A.</strong> {{ question.option_a }}</label>
+      </div>
+
+      <div class="option" onclick="selectOption(this, {{ question.id }}, 'B')">
+        <input type="radio" name="question_{{ question.id }}" value="B" id="q{{ question.id }}_b">
+        <label for="q{{ question.id }}_b"><strong>B.</strong> {{ question.option_b }}</label>
+      </div>
+
+      <div class="option" onclick="selectOption(this, {{ question.id }}, 'C')">
+        <input type="radio" name="question_{{ question.id }}" value="C" id="q{{ question.id }}_c">
+        <label for="q{{ question.id }}_c"><strong>C.</strong> {{ question.option_c }}</label>
+      </div>
+
+      <div class="option" onclick="selectOption(this, {{ question.id }}, 'D')">
+        <input type="radio" name="question_{{ question.id }}" value="D" id="q{{ question.id }}_d">
+        <label for="q{{ question.id }}_d"><strong>D.</strong> {{ question.option_d }}</label>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="navigation">
+    <button type="button" class="btn btn-secondary" onclick="prevQuestion()">Previous</button>
+    <button type="button" class="btn btn-secondary" onclick="nextQuestion()">Next</button>
+    <button type="button" class="btn btn-primary" onclick="submitExam()">
+      <i class="fas fa-paper-plane"></i> Submit Exam
+    </button>
+  </div>
+</form>
+
+<script>
+  let timeRemaining = {{ exam.duration_minutes }} * 60;
+  let answers = {};
+  let currentIndex = 0;
+  const questions = document.querySelectorAll('.question-card');
+
+  function updateTimer() {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    document.getElementById('time-display').textContent =
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    if (timeRemaining <= 0) {
+      alert("Time's up! Submitting your exam.");
+      submitExam();
+    } else {
+      timeRemaining--;
+    }
+  }
+  setInterval(updateTimer, 1000);
+
+  function showQuestion(index) {
+    questions.forEach((q, i) => {
+      q.classList.toggle('active', i === index);
+    });
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) {
+      currentIndex++;
+      showQuestion(currentIndex);
+    }
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      showQuestion(currentIndex);
+    }
+  }
+
+  function selectOption(element, questionId, value) {
+    // Highlight selected option
+    const questionCard = element.closest('.question-card');
+    questionCard.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+    element.classList.add('selected');
+    element.querySelector('input[type="radio"]').checked = true;
+
+    // Save answer
+    answers[questionId] = value;
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const filled = Object.keys(answers).length;
+    const percent = (filled / questions.length) * 100;
+    document.getElementById('progress-fill').style.width = percent + "%";
+  }
+
+  function submitExam() {
+    const timeTaken = {{ exam.duration_minutes }} * 60 - timeRemaining;
+
+    fetch('/submit_exam', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        exam_id: {{ exam.id }},
+        answers: answers,
+        time_taken: timeTaken
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(`Submitted successfully!\nScore: ${data.score}/${data.total_marks}`);
+        window.location.href = '/dashboard';
+      } else {
+        alert('Error submitting exam. Try again.');
+      }
+    });
+  }
+
+  window.addEventListener('beforeunload', function(e) {
+    if (!{{ session.get('exam_submitted', 'false')|lower }}) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+</script>
+{% endblock %}

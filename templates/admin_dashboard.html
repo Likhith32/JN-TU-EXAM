@@ -1,0 +1,56 @@
+<h3>Logged in as: {{ session['admin'] }}</h3>
+<a href="{{ url_for('admin_logout') }}">Logout</a>
+
+<h2>All Student Results</h2>
+
+<a href="{{ url_for('download_results_csv') }}" class="btn-download">Download Results CSV</a>
+
+<table>
+    <tr>
+        <th>Name</th><th>Roll No</th><th>Exam</th><th>Score</th><th>Total</th><th>Date</th>
+    </tr>
+    {% for result, user, exam in results %}
+    <tr>
+        <td>{{ user.name }}</td>
+        <td>{{ user.roll_no }}</td>
+        <td>{{ exam.title }}</td>
+        <td>{{ result.score }}</td>
+        <td>{{ result.total_marks }}</td>
+        <td>{{ result.completed_at.strftime('%d-%m-%Y %H:%M') }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<style>
+  .btn-download {
+    display: inline-block;
+    margin: 15px 0 30px 0;
+    padding: 10px 15px;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+  }
+  .btn-download:hover {
+    background: #5563c1;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  th {
+    background-color: #667eea;
+    color: white;
+  }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+</style>

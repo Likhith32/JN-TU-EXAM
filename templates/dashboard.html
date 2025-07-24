@@ -1,0 +1,138 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - JNTU GV Quiz Portal{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .stats-card {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        text-align: center;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .stats-card h3 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-card p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .section-title {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 1.5rem;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 0.5rem;
+    }
+    
+    .exam-item {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    .exam-item:hover {
+        transform: translateX(10px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .exam-info h4 {
+        color: #1a5db5;
+        margin-bottom: 0.5rem;
+    }
+    
+    .exam-info p {
+        color: #1538b8;
+        margin-bottom: 0.25rem;
+    }
+    /* Profile link styling */
+
+
+</style>
+
+<div class="dashboard-grid">
+    <div class="stats-card">
+        <h3>{{ progress_stats.total_exams }}</h3>
+        <p>Total Exams Available</p>
+    </div>
+    <div class="stats-card">
+        <h3>{{ progress_stats.completed_exams }}</h3>
+        <p>Exams Completed</p>
+    </div>
+    <div class="stats-card">
+        <h3>{{ progress_stats.avg_score }}%</h3>
+        <p>Average Score</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2 class="section-title"><i class="fas fa-chart-line"></i> Progress Overview</h2>
+    <div style="background: linear-gradient(90deg, #667eea, #764ba2); height: 10px; border-radius: 5px; overflow: hidden;">
+        <div style="background: #28a745; height: 100%; width: {{ progress_stats.completion_rate }}%; transition: width 0.3s ease;"></div>
+    </div>
+    <p style="margin-top: 0.5rem; color: #666;">{{ progress_stats.completion_rate }}% Complete</p>
+</div>
+<div class="dashboard-box" onclick="location.href='{{ url_for('results') }}'">
+
+</div>
+
+<div class="card">
+    <h2 class="section-title"><i class="fas fa-clipboard-check"></i> Available Exams</h2>
+    {% for exam in exams %}
+        <div class="exam-item">
+            <div class="exam-info">
+                <h4>{{ exam.title }}</h4>
+                <p><i class="fas fa-trophy"></i> Total Marks: {{ exam.total_marks }}</p>
+                <p><i class="fas fa-info-circle"></i> {{ exam.description }}</p>
+            </div>
+            <div>
+                {% set user_result = results | selectattr('exam_id', 'equalto', exam.id) | first %}
+                {% if user_result %}
+                    <span style="background: #28a745; color: white; padding: 0.5rem 1rem; border-radius: 5px;">
+                        <i class="fas fa-check"></i> Completed
+                    </span>
+                {% else %}
+                    <a href="{{ url_for('take_exam', exam_id=exam.id) }}" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Take Exam
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    
+    {% if not exams %}
+        <p style="text-align: center; color: #b79595; padding: 2rem;">No exams available at the moment.</p>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <a href="{{ url_for('results') }}" class="btn btn-secondary" 
+       style="background: linear-gradient(to right, #667eea, #764ba2); color: white; border: none;">
+        <i class="fas fa-chart-bar"></i> View All Results
+    </a>
+</div>
+
+
+
+
+{% endblock %}

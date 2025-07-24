@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Results - JNTU GV Quiz Portal{% endblock %}
+
+{% block content %}
+<style>
+    /* Same styles as before, trimmed here for brevity */
+</style>
+
+<div class="card">
+    <h2 style="text-align: center; color: #333; margin-bottom: 2rem;">
+        <i class="fas fa-chart-bar"></i> Your Exam Results
+    </h2>
+
+    {% if user_results %}
+        {% for result, exam in user_results %}
+            {% set percentage = (result.score / result.total_marks * 100) | round(1) %}
+            <div class="result-card">
+                <div>
+                    <div class="exam-title">{{ exam.title }}</div>
+                    <div class="exam-date">
+                        <i class="fas fa-calendar"></i> 
+                        {{ result.completed_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    </div>
+                    <div style="margin-top: 1rem; color: #666;">
+                        <i class="fas fa-clock"></i> Time Taken: {{ result.time_taken }} minutes
+                    </div>
+                </div>
+
+                <div class="score-display">
+                    <div class="score-number">{{ result.score }}/{{ result.total_marks }}</div>
+                    <div class="score-percentage">{{ percentage }}%</div>
+                </div>
+
+                <div>
+                    {% if percentage >= 90 %}
+                        <div class="performance-badge badge-excellent">Excellent!</div>
+                    {% elif percentage >= 75 %}
+                        <div class="performance-badge badge-good">Good</div>
+                    {% elif percentage >= 60 %}
+                        <div class="performance-badge badge-average">Average</div>
+                    {% else %}
+                        <div class="performance-badge badge-poor">Needs Improvement</div>
+                    {% endif %}
+
+                    <!-- Retake Exam Button -->
+                  
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 3rem; color: #666;">
+            <i class="fas fa-clipboard-list" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+            <h3>No exam results yet</h3>
+            <p>Take your first exam to see results here!</p>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-4">Go to Dashboard</a>
+        </div>
+    {% endif %}
+</div>
+
+{% if user_results %}
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+{% endif %}
+
+<script>
+function confirmRetake(examId) {
+    if (confirm("Are you sure you want to retake this exam? Your previous result will still be saved.")) {
+        window.location.href = "/exam/" + examId;
+    }
+}
+</script>
+{% endblock %}
