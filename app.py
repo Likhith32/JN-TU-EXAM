@@ -82,13 +82,11 @@ def save_profile_pic(file):
     return 'default.jpg'
 
 # -------------------- Routes --------------------
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
 # ----- Admin Routes -----
-
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
@@ -136,7 +134,6 @@ def admin_logout():
     return redirect(url_for('admin_login'))
 
 # ----- User Routes -----
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -144,8 +141,8 @@ def register():
         roll_no = data['roll_no']
 
         # Validation
-        if len(roll_no) != 10 or not roll_no.isdigit():
-            flash("Roll number must be exactly 10 digits.", "error")
+        if len(roll_no) != 10 or not roll_no.isalnum():
+            flash("Roll number must be exactly 10 alphanumeric characters.", "error")
             return render_template('register.html')
 
         if User.query.filter_by(email=data['email']).first():
